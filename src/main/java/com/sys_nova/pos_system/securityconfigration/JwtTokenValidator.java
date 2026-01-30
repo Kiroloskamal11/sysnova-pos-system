@@ -29,16 +29,17 @@ public class JwtTokenValidator extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        // 1. استخراج الـ Token من الـ Header بتاع الطلب
-        String jwt = request.getHeader("Authorization");
+              // 1. استخراج الـ Token من الـ Header بتاع الطلب
+              // 1. استخراج الـ Header بالكامل الأول
+            String authHeader = request.getHeader("Authorization");
 
-        if (jwt != null) {
-            // حذف كلمة "Bearer " عشان ناخد الكود المشفر بس
-            jwt = jwt.substring(7);
+            // هنا بنقوله: لو الـ Header مش فاضي وكمان بيبدأ بكلمة "Bearer " صح، ادخل نفذ
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+    
+            // بنقص أول 7 حروف (B-e-a-r-e-r-مسافة) عشان ناخد التوكن بس
+            String jwt = authHeader.substring(7);
 
-
-
-            // ده الكود اللي بيعدي الناس وتوقف الهاكرز 
+    
             try {
                 // 2. استخدام الـ Secret Key لفك التشفير (نفس اللي في الـ properties)
                 // SecretKey key = Keys.hmacShaKeyFor("YourSuperSecretKeyForSysnovaPOS2026Project".getBytes());//المفتاح السري يفتح ويتاكد من الكود اللي كان داخل ال JWT

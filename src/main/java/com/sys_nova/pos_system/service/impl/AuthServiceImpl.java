@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse signup(UserDto userDto) throws UserException {
-        
+
         // 1. التأكد من عدم تكرار الإيميل
         User isEmailExist = userRepository.findByEmail(userDto.getEmail());
         if (isEmailExist != null) {
@@ -43,16 +43,17 @@ public class AuthServiceImpl implements AuthService {
 
         // 2. استخدام الـ Mapper لتحويل الـ DTO لـ Entity
         User userToSave = UserMapper.toEntity(userDto);
-        
+
         // 3. تشفير الباسورد قبل الحفظ (خطوة أمان أساسية)
         userToSave.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
         userRepository.save(userToSave);
 
         // 4. عمل Authentication أوتوماتيك للمستخدم الجديد
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getEmail(), userDto.getPassword());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDto.getEmail(),
+                userDto.getPassword());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        
+
         // 5. توليد التوكن
         String token = jwtProvider.generateToken(authentication);
 
@@ -89,12 +90,12 @@ public class AuthServiceImpl implements AuthService {
         if (userDetails == null) {
             throw new BadCredentialsException("Invalid username...");
         }
-        
+
         // التأكد من تطابق الباسورد المكتوب مع المشفر
         if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("Invalid password...");
         }
-        
+
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }

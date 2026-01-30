@@ -16,39 +16,41 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
 
-
 //annotation 
 @EnableWebSecurity
-//ده اللي بيشفل ال springsecurity بدونه مفيش امان اي حد يدخل علي قاعده البيانات
+// ده اللي بيشفل ال springsecurity بدونه مفيش امان اي حد يدخل علي قاعده البيانات
 
 @Configuration
-//ده يباغ جافا ان ده مشش كود عادي ولكن ده ملف اعدادات اول ما السيرفر يشتغل نفذه
+// ده يباغ جافا ان ده مشش كود عادي ولكن ده ملف اعدادات اول ما السيرفر يشتغل نفذه
 
-public class securityconfig{
+public class securityconfig {
 
-
-    // Bean :- يعني انك هتنتج كائن سبرينج هديره طول تشغيل البرنامج 
+    // Bean :- يعني انك هتنتج كائن سبرينج هديره طول تشغيل البرنامج
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))//هنا انا عرفت النظام ان انا هستخدم ال JWT
+        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))// هنا
+                                                                                                               // انا
+                                                                                                               // عرفت
+                                                                                                               // النظام
+                                                                                                               // ان انا
+                                                                                                               // هستخدم
+                                                                                                               // ال JWT
                 .authorizeHttpRequests(Authorize -> Authorize
                         .requestMatchers("/api/**").authenticated() // أي طلب بيبدأ بـ /api لازم يكون متسجل
                         .anyRequest().permitAll() // باقي الطلبات متاحة (زي تسجيل الدخول)
 
-
                 )
 
-                // ده الكلاس اللي هيشوف التوكن ويتحقق منها 
-                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class) // هنكريت الكلاس ده الخطوة الجاية
+                // ده الكلاس اللي هيشوف التوكن ويتحقق منها
+                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class) // هنكريت الكلاس ده الخطوة
+                                                                                           // الجاية
                 .csrf(csrf -> csrf.disable()) // بنعطله لأننا شغالين JWT
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }
-
-
 
     // ده المسؤول عن تشفير كلمة السر قبل ما تروح للـ phpMyAdmin
     @Bean
@@ -56,11 +58,9 @@ public class securityconfig{
         return new BCryptPasswordEncoder();
     }
 
-
-
     // إعدادات الـ CORS عشان الـ React يقدر يكلم الـ Java بدون مشاكل
 
-    //يسمح التعامل بين راكت وجافا بدون قيود 
+    // يسمح التعامل بين راكت وجافا بدون قيود
     private CorsConfigurationSource corsConfigurationSource() {
         return request -> {
             CorsConfiguration cfg = new CorsConfiguration();

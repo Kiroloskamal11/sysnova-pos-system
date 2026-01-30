@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     // 2. مسار تسجيل الدخول (Signin)
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<AuthResponse> signinHandler(@RequestBody UserDto userDto) {
         // بننادي ميثود الـ login في الـ Service
         AuthResponse response = authService.login(userDto);
