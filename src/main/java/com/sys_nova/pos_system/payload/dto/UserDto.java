@@ -1,0 +1,30 @@
+package com.sys_nova.pos_system.payload.dto;
+
+import java.time.LocalDateTime;
+
+import com.sys_nova.pos_system.model.UserRole;
+
+import lombok.Data;
+
+
+@Data
+public class UserDto {
+
+
+    private Long id;
+
+    private String fullName;
+
+    private String email;
+
+    private String phone;
+
+    private String password; 
+
+    private UserRole role;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime lastLogin;
+
+}

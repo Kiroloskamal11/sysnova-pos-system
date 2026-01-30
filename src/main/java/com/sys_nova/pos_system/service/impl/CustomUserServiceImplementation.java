@@ -1,9 +1,10 @@
-package com.sys_nova.pos_system.serviceImpl;
+package com.sys_nova.pos_system.service.impl;
 
 
 
 import com.sys_nova.pos_system.model.User;
-import com.sys_nova.pos_system.Repository.UserRepository;
+import com.sys_nova.pos_system.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

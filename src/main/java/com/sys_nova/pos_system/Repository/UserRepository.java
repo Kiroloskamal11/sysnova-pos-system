@@ -1,4 +1,4 @@
-package com.sys_nova.pos_system.Repository;
+package com.sys_nova.pos_system.repository;
 
 import com.sys_nova.pos_system.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
