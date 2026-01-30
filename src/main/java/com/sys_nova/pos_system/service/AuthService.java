@@ -1,6 +1,6 @@
 package com.sys_nova.pos_system.service;
 
-import com.sys_nova.pos_system.exciption.UserException;
+import com.sys_nova.pos_system.exception.UserException;
 import com.sys_nova.pos_system.payload.dto.UserDto;
 import com.sys_nova.pos_system.payload.response.AuthResponse;
 

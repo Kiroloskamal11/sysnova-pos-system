@@ -1,6 +1,6 @@
 package com.sys_nova.pos_system.service.impl;
 
-import com.sys_nova.pos_system.exciption.UserException;
+import com.sys_nova.pos_system.exception.UserException;
 import com.sys_nova.pos_system.mapper.UserMapper;
 import com.sys_nova.pos_system.model.User;
 import com.sys_nova.pos_system.repository.UserRepository;

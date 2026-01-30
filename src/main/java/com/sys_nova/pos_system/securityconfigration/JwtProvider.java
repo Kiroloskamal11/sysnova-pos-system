@@ -8,13 +8,12 @@ package com.sys_nova.pos_system.securityconfigration;
 
 //     استخدام الـ Secret Key: بيسحب المفتاح من ملف الـ JwtConstant اللي إحنا لسه عاملينه عشان "يختم" بيه التوكن
 
-
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Collection;
@@ -22,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+@Component
 public class JwtProvider {
 
     // 1. إنشاء المفتاح السري باستخدام المفتاح اللي حطيناه في JwtConstant
@@ -29,7 +29,7 @@ public class JwtProvider {
 
     // 2. ميثود إنشاء التوكن (Generate Token)
     public static String generateToken(Authentication auth) {
-        
+
         // استخراج الصلاحيات (Roles) وتحويلها لنص مفصول بفواصل
         Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
         String roles = populateAuthorities(authorities);
@@ -37,12 +37,12 @@ public class JwtProvider {
         // بناء التوكن
         String jwt = Jwts.builder()
                 .issuedAt(new Date()) // حذفنا كلمة "set" وبقت أول حرف صغير
-                .expiration(new Date(new Date().getTime() +   (86400000  * 1))) // نفس الكلام هنا
+                .expiration(new Date(new Date().getTime() + (86400000 * 1))) // نفس الكلام هنا
                 .claim("email", auth.getName()) // تخزين الإيميل جوه التوكن
                 .claim("authorities", roles) // تخزين الأدوار (Admin, User) جوه التوكن
                 .signWith(key) // التوقيع بالمفتاح السري
                 .compact(); // تحويله لنص نهائي
-        
+
         return jwt;
     }
 
@@ -52,12 +52,12 @@ public class JwtProvider {
         if (jwt.startsWith("Bearer ")) {
             jwt = jwt.substring(7);
         }
-        
+
         Claims claims = Jwts.parser()
-        .verifyWith(key) // السنتاكس الجديد بدل setSigningKey
-        .build()
-        .parseSignedClaims(jwt) // بدل parseClaimsJws
-        .getPayload(); // بدل getBody
+                .verifyWith(key) // السنتاكس الجديد بدل setSigningKey
+                .build()
+                .parseSignedClaims(jwt) // بدل parseClaimsJws
+                .getPayload(); // بدل getBody
 
         return String.valueOf(claims.get("email"));
     }
@@ -72,6 +72,4 @@ public class JwtProvider {
     }
 }
 
-
-
-//                              الملف ده هو اللي بيطبع التوكن 
+// الملف ده هو اللي بيطبع التوكن
