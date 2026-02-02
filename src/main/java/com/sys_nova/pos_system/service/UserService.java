@@ -6,6 +6,9 @@ import java.util.List;
 
 public interface UserService {
 
+    // السطر ده هو اللي ناقصك:
+    public User findUserByJwtToken(String jwt) throws Exception;
+
     // 1. جلب بيانات المستخدم من خلال التوكن مباشرة
     User getUserFromJwtToken(String jwt) throws UserException;
 

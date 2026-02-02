@@ -13,6 +13,27 @@ import java.util.Optional;
 @Service // بنعرف Spring إن ده كلاس الخدمة
 public class UserServiceImpl implements UserService {
 
+
+
+    @Override
+    public User findUserByJwtToken(String jwt) throws Exception 
+    {
+        // 1. استخراج الإيميل من التوكن باستخدام الـ JwtProvider اللي عملناه قبل كدة
+        String email = JwtProvider.getEmailFromJwtToken(jwt);
+    
+        // 2. البحث عن اليوزر في الداتا بيز باستخدام الإيميل
+        User user = userRepository.findByEmail(email);
+        
+        if(user == null) {
+            throw new Exception("User not found with email: " + email);
+        }
+    
+        return user;
+    }
+
+
+
+
     @Autowired
     private UserRepository userRepository;
 
