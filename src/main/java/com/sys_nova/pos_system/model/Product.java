@@ -50,9 +50,8 @@ public class Product {
     @JoinColumn(name = "store_id")
     private Store store; // المنتج ده تابع لانهي محل؟
 
-    // @ManyToOne
-    // @JoinColumn(name = "category_id")
-    //private Category category; // المنتج ده في قسم إيه؟
+    @ManyToOne
+    private Category category; // المنتج ده في قسم إيه؟
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -184,6 +183,15 @@ public class Product {
     public void setBrand(String brand) {
         this.brand = brand;
     }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+    
 
     
 

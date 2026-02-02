@@ -36,6 +36,10 @@ public class ProductDTO {
     private String brand;
 
 
+
+    private CategoryDTO category;
+
+
    
     
 
@@ -135,6 +139,13 @@ public class ProductDTO {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
+    public CategoryDTO getCategory() {
+        return category;
+    }
+    public void setCategory(CategoryDTO category) {
+        this.category = category;
+    }
+    
 
     
     
