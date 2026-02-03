@@ -33,6 +33,37 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;
+
+
+
+
+    // employee
+
+    private Double salary; // الراتب
+    private String position; // المسمى الوظيفي (مثلاً كاشير، محاسب)
+
+    @ManyToOne
+    @JoinColumn(name = "branch_id")
+    private Branch branch; 
+
+    // الـ Getters والـ Setters للحقول الجديدة
+    public Double getSalary() { return salary; }
+    public void setSalary(Double salary) { this.salary = salary; }
+    public String getPosition() { return position; }
+    public void setPosition(String position) { this.position = position; }
+    public Branch getBranch() { return branch; }
+    public void setBranch(Branch branch) { this.branch = branch; }
+
+
+
+
+
+
+
+
+
+
+
     public Long getId() {
         return id;
     }
