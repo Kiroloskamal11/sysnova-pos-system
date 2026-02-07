@@ -2,6 +2,7 @@ package com.sys_nova.pos_system.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ import com.sys_nova.pos_system.domain.StoreStatus;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Store {
 
     @Id

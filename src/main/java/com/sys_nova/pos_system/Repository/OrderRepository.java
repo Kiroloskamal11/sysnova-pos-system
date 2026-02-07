@@ -8,6 +8,9 @@ import com.sys_nova.pos_system.model.User;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
+    // ضيف السطر ده هنا
+    List<Order> findByShiftReportId(Long shiftId);
+
     List<Order> findByCustomerId(Long customerId);
     
     List<Order> findByBranchId(Long branchId);

@@ -4,6 +4,8 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.Email;
 
 
+
+
 @Embeddable
 public class StoreContect {
 

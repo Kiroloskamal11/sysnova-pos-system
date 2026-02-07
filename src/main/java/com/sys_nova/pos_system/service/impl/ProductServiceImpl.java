@@ -28,40 +28,35 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    private final ProductMapper productMapper = new ProductMapper();
+    // تم حذف سطر الـ productMapper = new ProductMapper() لأنه لم يعد له داعي
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO, User user) {
-        // 1. جلب المحل المرتبط بالأدمن (المستخدم الحالي)
         Store store = storeRepository.findByStoreAdminId(user.getId());
         if (store == null) {
             throw new RuntimeException("No store found for this admin");
         }
 
-        // 2. جلب القسم (Category) إذا تم إرسال ID له
         Category category = null;
         if (productDTO.getCategoryId() != null) {
             category = categoryRepository.findById(productDTO.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productDTO.getCategoryId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("Category not found with ID: " + productDTO.getCategoryId()));
         }
 
-        // 3. تحويل الـ DTO إلى Entity وربط العلاقات
-        Product product = productMapper.toEntity(productDTO, store, category);
-        
-        // 4. حفظ المنتج في قاعدة البيانات
+        // استخدام الـ Static Method مباشرة
+        Product product = ProductMapper.toEntity(productDTO, store, category);
+
         Product savedProduct = productRepository.save(product);
-        
-        // 5. تحويل النتيجة لـ DTO وإرجاعها
-        return productMapper.toDTO(savedProduct);
+
+        return ProductMapper.toDTO(savedProduct);
     }
 
     @Override
     public ProductDTO updateProduct(Long id, ProductDTO productDTO, User user) {
-        // 1. التأكد من وجود المنتج
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        // 2. تحديث البيانات الأساسية
         existingProduct.setName(productDTO.getName());
         existingProduct.setDescription(productDTO.getDescription());
         existingProduct.setPrice(productDTO.getPrice());
@@ -72,21 +67,18 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setSku(productDTO.getSku());
         existingProduct.setImage(productDTO.getImage());
 
-        // 3. تحديث القسم (Category) إذا تغير
         if (productDTO.getCategoryId() != null) {
             Category category = categoryRepository.findById(productDTO.getCategoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found"));
             existingProduct.setCategory(category);
         }
 
-        // 4. حفظ التعديلات
         Product updatedProduct = productRepository.save(existingProduct);
-        return productMapper.toDTO(updatedProduct);
+        return ProductMapper.toDTO(updatedProduct);
     }
 
     @Override
     public void deleteProduct(Long id, User user) {
-        // يمكنك هنا إضافة تحكم إضافي للتأكد من أن الأدمن يمسح منتج تابع لمحله فقط
         if (!productRepository.existsById(id)) {
             throw new RuntimeException("Product not found");
         }
@@ -96,14 +88,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDTO> getProductsByStoreId(Long storeId) {
         return productRepository.findByStoreId(storeId).stream()
-                .map(productMapper::toDTO)
+                .map(ProductMapper::toDTO) // استخدام الـ Method Reference للـ Static Method
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ProductDTO> searchByKeyword(Long storeId, String keyword) {
         return productRepository.searchByKeyword(storeId, keyword).stream()
-                .map(productMapper::toDTO)
+                .map(ProductMapper::toDTO)
                 .collect(Collectors.toList());
     }
 }

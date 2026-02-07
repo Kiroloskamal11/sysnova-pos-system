@@ -9,13 +9,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class OrderDTO {
 
-        
     private Long id;
 
     private Double totalAmount;
@@ -26,18 +24,15 @@ public class OrderDTO {
 
     private LocalDateTime createdAt;
 
-    
     private BranchDTO branch;
 
-    
     private UserDto cashier;
 
-    
+    private Long cashierId;
+
     private CustomerDTO customer;
 
-
     private PaymentType paymentType;
-
 
     private List<OrderItemDTO> items;
 
@@ -121,10 +116,12 @@ public class OrderDTO {
         this.paymentType = paymentType;
     }
 
-    
+    public Long getCashierId() {
+        return cashierId;
+    }
 
-
-    
-
+    public void setCashierId(Long cashierId) {
+        this.cashierId = cashierId;
+    }
 
 }

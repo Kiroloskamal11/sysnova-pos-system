@@ -16,11 +16,19 @@ import java.util.stream.Collectors;
 @Service
 public class RefundServiceImpl implements RefundService {
 
-    @Autowired private RefundRepository refundRepository;
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private ProductRepository productRepository;
-    @Autowired private BranchRepository branchRepository;
-    @Autowired private UserRepository userRepository; // تأكد أن الاسم مطابق عندك (User أو Cashier)
+    @Autowired
+    private RefundRepository refundRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private BranchRepository branchRepository;
+    @Autowired
+    private UserRepository userRepository; // تأكد أن الاسم مطابق عندك (User أو Cashier)
+    // ضيفها هنا يا هندسة
+    @Autowired
+    private ShiftReportRepository shiftReportRepository;
 
     @Override
     @Transactional
@@ -51,9 +59,19 @@ public class RefundServiceImpl implements RefundService {
         refund.setAmount(order.getTotalAmount()); // استرجاع كامل المبلغ
         refund.setReason(refundDTO.getReason());
         refund.setPaymentType(order.getPaymentType());
-        
+
+        // فرضاً إن معاك userId أو بتجيبه من الـ refundDTO
+        User user = userRepository.findById(refundDTO.getCashierId())
+                .orElseThrow(() -> new RuntimeException("المستخدم غير موجود"));
+        // 1. جلب الوردية المفتوحة
+        ShiftReport currentShift = shiftReportRepository.findTopByCashierAndShiftEndIsNullOrderByShiftStartDesc(user)
+                .orElseThrow(() -> new RuntimeException("لا يمكن عمل مرتجع بدون وردية مفتوحة!"));
+
+        // 2. ربط المرتجع بالوردية
+        refund.setShiftReport(currentShift);
+
         // هنا تجاهلنا الـ ShiftReport خالص لأنه مش موجود لسه
-        
+
         Refund savedRefund = refundRepository.save(refund);
         return RefundMapper.toDTO(savedRefund);
     }

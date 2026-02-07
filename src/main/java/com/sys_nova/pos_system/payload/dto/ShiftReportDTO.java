@@ -1,57 +1,43 @@
-package com.sys_nova.pos_system.model;
+package com.sys_nova.pos_system.payload.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.persistence.*;
+import com.sys_nova.pos_system.model.PaymentSummary;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
-@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ShiftReport {
+public class ShiftReportDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private LocalDateTime shiftStart;
+
     private LocalDateTime shiftEnd;
 
-    private Double totalSales = 0.0;
-    private Double totalRefunds = 0.0;
-    private Double netSale = 0.0;
-    private int totalOrders = 0;
+    private Double totalSales;
+    private Double totalRefunds;
+    private Double netSale;
+    private int totalOrders;
 
-    @ManyToOne
-    private User cashier;
+    private UserDto cashier;
+    private Long cashierId;
+    private Long branchId;
 
-    @ManyToOne
-    private Branch branch;
+    private BranchDTO branch;
 
-    @Transient
     private List<PaymentSummary> paymentSummaries;
 
-    @ManyToMany // الأفضل ManyToMany للأصناف الأكثر مبيعاً
-    private List<Product> topSellingProducts;
+    private List<ProductDTO> topSellingProducts;
 
-    @Transient
-    private List<Order> recentOrders;
+    private List<OrderDTO> recentOrders;
 
-    @OneToMany(mappedBy = "shiftReport", cascade = CascadeType.ALL)
-    private List<Refund> refunds;
-
-    // ميثود لحساب الصافي بأمان قبل الحفظ
-    @PreUpdate
-    @PrePersist
-    public void calculateNet() {
-        this.totalSales = (totalSales == null) ? 0.0 : totalSales;
-        this.totalRefunds = (totalRefunds == null) ? 0.0 : totalRefunds;
-        this.netSale = this.totalSales - this.totalRefunds;
-    }
+    private List<RefundDTO> refunds;
 
     public Long getId() {
         return id;
@@ -101,27 +87,19 @@ public class ShiftReport {
         this.netSale = netSale;
     }
 
-    public int getTotalOrders() {
-        return totalOrders;
-    }
-
-    public void setTotalOrders(int totalOrders) {
-        this.totalOrders = totalOrders;
-    }
-
-    public User getCashier() {
+    public UserDto getCashier() {
         return cashier;
     }
 
-    public void setCashier(User cashier) {
+    public void setCashier(UserDto cashier) {
         this.cashier = cashier;
     }
 
-    public Branch getBranch() {
+    public BranchDTO getBranch() {
         return branch;
     }
 
-    public void setBranch(Branch branch) {
+    public void setBranch(BranchDTO branch) {
         this.branch = branch;
     }
 
@@ -133,28 +111,52 @@ public class ShiftReport {
         this.paymentSummaries = paymentSummaries;
     }
 
-    public List<Product> getTopSellingProducts() {
+    public List<ProductDTO> getTopSellingProducts() {
         return topSellingProducts;
     }
 
-    public void setTopSellingProducts(List<Product> topSellingProducts) {
+    public void setTopSellingProducts(List<ProductDTO> topSellingProducts) {
         this.topSellingProducts = topSellingProducts;
     }
 
-    public List<Order> getRecentOrders() {
-        return recentOrders;
-    }
-
-    public void setRecentOrders(List<Order> recentOrders) {
-        this.recentOrders = recentOrders;
-    }
-
-    public List<Refund> getRefunds() {
+    public List<RefundDTO> getRefunds() {
         return refunds;
     }
 
-    public void setRefunds(List<Refund> refunds) {
+    public void setRefunds(List<RefundDTO> refunds) {
         this.refunds = refunds;
+    }
+
+    public Long getCashierId() {
+        return cashierId;
+    }
+
+    public void setCashierId(Long cashierId) {
+        this.cashierId = cashierId;
+    }
+
+    public Long getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(Long branchId) {
+        this.branchId = branchId;
+    }
+
+    public List<OrderDTO> getRecentOrders() {
+        return recentOrders;
+    }
+
+    public void setRecentOrders(List<OrderDTO> recentOrders) {
+        this.recentOrders = recentOrders;
+    }
+
+    public int getTotalOrders() {
+        return totalOrders;
+    }
+
+    public void setTotalOrders(int totalOrders) {
+        this.totalOrders = totalOrders;
     }
 
 }

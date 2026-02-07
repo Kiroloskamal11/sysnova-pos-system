@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
@@ -56,6 +57,22 @@ public class Order {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+
+
+    // داخل كلاس Order
+    @ManyToOne
+    @JoinColumn(name = "shift_report_id") // ده اسم العمود اللي هيتكريه في الداتا بيز
+    private ShiftReport shiftReport;
+    
+    // لو مش مستخدم @Data من Lombok، ضيف الـ Getter والـ Setter يدوي:
+    public void setShiftReport(ShiftReport shiftReport) {
+        this.shiftReport = shiftReport;
+    }
+    
+    public ShiftReport getShiftReport() {
+        return shiftReport;
     }
 
 

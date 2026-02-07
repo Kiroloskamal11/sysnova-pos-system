@@ -20,16 +20,25 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private ProductRepository productRepository;
-    @Autowired private CustomerRepository customerRepository;
-    @Autowired private BranchRepository branchRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
+    private BranchRepository branchRepository;
+    // ضيفها هنا يا هندسة
+    @Autowired
+    private ShiftReportRepository shiftReportRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-@Override
+    @Override
     @Transactional // تأكد من وجود الـ Annotation دي عشان لو حصل مشكلة في المخزن يلغي العملية كلها
     public OrderDTO createorder(OrderDTO orderDTO) throws Exception {
         Order order = new Order();
-        
+
         // 1. التعامل مع العميل (بشكل اختياري)
         if (orderDTO.getCustomerId() != null) {
             Customer customer = customerRepository.findById(orderDTO.getCustomerId()).orElse(null);
@@ -46,7 +55,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 3. ضبط نوع الدفع
         order.setPaymentType(orderDTO.getPaymentType());
-        
+
         List<OrderItem> orderItems = new ArrayList<>();
         double totalAmount = 0.0;
 
@@ -58,17 +67,17 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItemDTO itemDTO : orderDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
                     .orElseThrow(() -> new Exception("Product not found with ID: " + itemDTO.getProductId()));
-        
+
             // التحقق من توافر الكمية في المخزن
             if (product.getQuantity() < itemDTO.getQuantity()) {
-                throw new Exception("Stock insufficient for product: " + product.getName() + 
-                                  " (Available: " + product.getQuantity() + ")");
+                throw new Exception("Stock insufficient for product: " + product.getName() +
+                        " (Available: " + product.getQuantity() + ")");
             }
-        
+
             // خصم الكمية من المخزن وحفظ المنتج
             product.setQuantity(product.getQuantity() - itemDTO.getQuantity());
             productRepository.save(product);
-        
+
             // إنشاء سطر الفاتورة
             OrderItem item = new OrderItem();
             item.setProduct(product);
@@ -77,14 +86,24 @@ public class OrderServiceImpl implements OrderService {
             item.setOrder(order);
 
             orderItems.add(item);
-        
+
             // حساب الإجمالي
             totalAmount += item.getPrice() * item.getQuantity();
         }
 
         order.setItems(orderItems);
         order.setTotalAmount(totalAmount);
-        
+
+        // 1. هنجيب الـ User من الـ ID اللي جوه الـ DTO
+        User user = userRepository.findById(orderDTO.getCashierId())
+                .orElseThrow(() -> new RuntimeException("المستخدم غير موجود"));
+        // 1. جلب الوردية المفتوحة للكاشير الحالي
+        ShiftReport currentShift = shiftReportRepository.findTopByCashierAndShiftEndIsNullOrderByShiftStartDesc(user)
+                .orElseThrow(() -> new RuntimeException("لا يمكن إتمام البيع بدون فتح وردية!"));
+
+        // 2. ربط الأوردر بالوردية
+        order.setShiftReport(currentShift);
+
         // 5. حفظ الفاتورة وتحويلها لـ DTO
         Order savedOrder = orderRepository.save(order);
         return OrderMapper.toDTO(savedOrder);
@@ -112,8 +131,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // باقي الميثودز (Delete, GetByCustomer...) تنفذ بنفس النمط
-    @Override public void deleteorder(Long id) throws Exception { orderRepository.deleteById(id); }
-    @Override public List<OrderDTO> getorderByCashier(Long cashierId) { return null; } // تنفيذ حسب الحاجة
-    @Override public List<OrderDTO> get0rdersByCustomerId(Long customerId) { return null; }
-    @Override public List<OrderDTO> getordersByBranch(Long b, Long c, Long cash, PaymentType p, OrderStatus s) { return null; }
+    @Override
+    public void deleteorder(Long id) throws Exception {
+        orderRepository.deleteById(id);
+    }
+
+    @Override
+    public List<OrderDTO> getorderByCashier(Long cashierId) {
+        return null;
+    } // تنفيذ حسب الحاجة
+
+    @Override
+    public List<OrderDTO> get0rdersByCustomerId(Long customerId) {
+        return null;
+    }
+
+    @Override
+    public List<OrderDTO> getordersByBranch(Long b, Long c, Long cash, PaymentType p, OrderStatus s) {
+        return null;
+    }
 }
