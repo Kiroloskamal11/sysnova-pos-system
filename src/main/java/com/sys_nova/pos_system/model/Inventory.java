@@ -2,9 +2,6 @@ package com.sys_nova.pos_system.model;
 
 import java.time.LocalDateTime;
 
-import com.sys_nova.pos_system.payload.dto.BranchDTO;
-import com.sys_nova.pos_system.payload.dto.ProductDTO;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

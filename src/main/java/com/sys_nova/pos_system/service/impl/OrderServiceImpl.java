@@ -25,58 +25,67 @@ public class OrderServiceImpl implements OrderService {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private BranchRepository branchRepository;
 
-    @Override
-    @Transactional // ضروري جداً عشان لو خطوة فشلت كلو يتلغي
+@Override
+    @Transactional // تأكد من وجود الـ Annotation دي عشان لو حصل مشكلة في المخزن يلغي العملية كلها
     public OrderDTO createorder(OrderDTO orderDTO) throws Exception {
         Order order = new Order();
         
-        // 1. جلب العميل والفرع والكاشير
-        Customer customer = customerRepository.findById(orderDTO.getCustomerId())
-                .orElseThrow(() -> new Exception("Customer not found"));
+        // 1. التعامل مع العميل (بشكل اختياري)
+        if (orderDTO.getCustomerId() != null) {
+            Customer customer = customerRepository.findById(orderDTO.getCustomerId()).orElse(null);
+            order.setCustomer(customer);
+        }
+
+        // 2. التحقق من وجود الفرع (إلزامي)
+        if (orderDTO.getBranchId() == null) {
+            throw new Exception("Branch ID must not be null! Please send branchId in your request.");
+        }
         Branch branch = branchRepository.findById(orderDTO.getBranchId())
-                .orElseThrow(() -> new Exception("Branch not found"));
-        // نفترض أن الكاشير هو اليوزر الحالي (ممكن تجيبه من السكيورتي)
-        
-        order.setCustomer(customer);
+                .orElseThrow(() -> new Exception("Branch not found with ID: " + orderDTO.getBranchId()));
         order.setBranch(branch);
+
+        // 3. ضبط نوع الدفع
         order.setPaymentType(orderDTO.getPaymentType());
         
         List<OrderItem> orderItems = new ArrayList<>();
         double totalAmount = 0.0;
 
-        // 2. معالجة بنود الفاتورة والتحقق من المخزن
+        // 4. معالجة المنتجات (التحقق من المخزن وحساب السعر)
+        if (orderDTO.getItems() == null || orderDTO.getItems().isEmpty()) {
+            throw new Exception("Order must have at least one item!");
+        }
+
         for (OrderItemDTO itemDTO : orderDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new Exception("Product not found"));
+                    .orElseThrow(() -> new Exception("Product not found with ID: " + itemDTO.getProductId()));
         
-            // التحقق من المخزن
+            // التحقق من توافر الكمية في المخزن
             if (product.getQuantity() < itemDTO.getQuantity()) {
-                throw new Exception("Stock insufficient for: " + product.getName());
+                throw new Exception("Stock insufficient for product: " + product.getName() + 
+                                  " (Available: " + product.getQuantity() + ")");
             }
         
-            // تحديث المخزن
+            // خصم الكمية من المخزن وحفظ المنتج
             product.setQuantity(product.getQuantity() - itemDTO.getQuantity());
             productRepository.save(product);
         
+            // إنشاء سطر الفاتورة
             OrderItem item = new OrderItem();
             item.setProduct(product);
             item.setQuantity(itemDTO.getQuantity());
-            
-            // ركز هنا: اتأكد من اسم الحقل في الـ Product Entity عندك 
-            // لو اسمه price خليه product.getPrice()
-            item.setPrice(product.getPrice()); 
-            
+            item.setPrice(product.getPrice()); // السعر بيتاخد من المنتج الحالي
             item.setOrder(order);
 
             orderItems.add(item);
         
-            // حساب الإجمالي لكل سطر وجمعه على الإجمالي الكلي
+            // حساب الإجمالي
             totalAmount += item.getPrice() * item.getQuantity();
         }
 
         order.setItems(orderItems);
         order.setTotalAmount(totalAmount);
         
+        // 5. حفظ الفاتورة وتحويلها لـ DTO
         Order savedOrder = orderRepository.save(order);
         return OrderMapper.toDTO(savedOrder);
     }

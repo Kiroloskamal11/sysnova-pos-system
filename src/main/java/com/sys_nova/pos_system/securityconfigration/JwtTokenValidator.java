@@ -29,47 +29,40 @@ public class JwtTokenValidator extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-              // 1. استخراج الـ Token من الـ Header بتاع الطلب
-              // 1. استخراج الـ Header بالكامل الأول
-            String authHeader = request.getHeader("Authorization");
+        // --- الإضافة المنقذة هنا ---
+        String path = request.getRequestURI();
+        // لو المسار بيبدأ بـ /auth/، تجاهل الفلتر ده تماماً وكمل طريقك
+        if (path.startsWith("/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // ---------------------------
 
-            // هنا بنقوله: لو الـ Header مش فاضي وكمان بيبدأ بكلمة "Bearer " صح، ادخل نفذ
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-    
-            // بنقص أول 7 حروف (B-e-a-r-e-r-مسافة) عشان ناخد التوكن بس
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String jwt = authHeader.substring(7);
 
-    
             try {
-                // 2. استخدام الـ Secret Key لفك التشفير (نفس اللي في الـ properties)
-                // SecretKey key = Keys.hmacShaKeyFor("YourSuperSecretKeyForSysnovaPOS2026Project".getBytes());//المفتاح السري يفتح ويتاكد من الكود اللي كان داخل ال JWT
-
-
-                // بدل ما تكتب النص يدوي، اسحبه من الثوابت
                 SecretKey key = Keys.hmacShaKeyFor(JwtConstant.SECRET_KEY.getBytes());
 
-
-                // 3. قراءة البيانات (Claims) اللي جوه الـ Token
                 Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(jwt).getPayload();
-
                 
                 String email = String.valueOf(claims.get("email"));
                 String authorities = String.valueOf(claims.get("authorities"));
 
-                // 4. تحويل الصلاحيات من نص لـ قائمة مفهومة لجافا
                 List<GrantedAuthority> auths = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
 
-                // 5. إنشاء هوية المستخدم وإبلاغ Spring إن الشخص ده "تمام"
                 Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, auths);
-                SecurityContextHolder.getContext().setAuthentication(authentication);//خزنه بحط فيها معلومات الشخص المهمه زي الايميل بعد ما نتاكد من صلاحياته 
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (Exception e) {
-                // لو التوكن بايظ أو منتهي، بنرمي Error
+                // نصيحة: في مرحلة الـ Signup/Login الـ Postman أحياناً بيبعت الهيدر القديم آلياً
+                // فإحنا بنمنع الـ Exception دي إنها توقف السيرفر
                 throw new BadCredentialsException("Invalid token... من فضلك سجل دخول تاني");
             }
         }
 
-        // 6. كمل طريقك لباقي الفلاتر أو الـ Controller
         filterChain.doFilter(request, response);
     }
 }
