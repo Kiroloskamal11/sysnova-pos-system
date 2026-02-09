@@ -1,5 +1,3 @@
-// Roles => Authorization ,Authentication , JWT
-
 package com.sys_nova.pos_system.securityconfigration;
 
 import org.springframework.context.annotation.Bean;
@@ -14,64 +12,51 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.Arrays;
-
-
 import java.util.Collections;
 
-//annotation 
-@EnableWebSecurity
-// ده اللي بيشفل ال springsecurity بدونه مفيش امان اي حد يدخل علي قاعده البيانات
-
 @Configuration
-// ده يباغ جافا ان ده مشش كود عادي ولكن ده ملف اعدادات اول ما السيرفر يشتغل نفذه
-
+@EnableWebSecurity
 public class securityconfig {
-
-    // Bean :- يعني انك هتنتج كائن سبرينج هديره طول تشغيل البرنامج
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))// هنا
-                                                                                                               // انا
-                                                                                                               // عرفت
-                                                                                                               // النظام
-                                                                                                               // ان انا
-                                                                                                               // هستخدم
-                                                                                                               // ال JWT
-                .authorizeHttpRequests(Authorize -> Authorize
-                        .requestMatchers("/api/**").authenticated() // أي طلب بيبدأ بـ /api لازم يكون متسجل
-                        .anyRequest().permitAll() // باقي الطلبات متاحة (زي تسجيل الدخول)
-
-                )
-
-                // ده الكلاس اللي هيشوف التوكن ويتحقق منها
-                .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class) // هنكريت الكلاس ده الخطوة
-                                                                                           // الجاية
-                .csrf(csrf -> csrf.disable()) // بنعطله لأننا شغالين JWT
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // 1. تفعيل الـ CORS باستخدام الميثود اللي تحت
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // 2. تعطيل الـ CSRF تماماً
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(Authorize -> Authorize
+                    // 3. تأكد إن مسار اللوجين مفتوح تماماً
+                    .requestMatchers("/auth/**").permitAll() 
+                    .requestMatchers("/api/**").authenticated()
+                    .anyRequest().permitAll()
+            )
+            // 4. إضافة الفلتر بتاعك
+            .addFilterBefore(new JwtTokenValidator(), BasicAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ده المسؤول عن تشفير كلمة السر قبل ما تروح للـ phpMyAdmin
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // إعدادات الـ CORS عشان الـ React يقدر يكلم الـ Java بدون مشاكل
-
-    // يسمح التعامل بين راكت وجافا بدون قيود
     private CorsConfigurationSource corsConfigurationSource() {
         return request -> {
             CorsConfiguration cfg = new CorsConfiguration();
-            // التعديل هنا: غيرنا 3000 لـ 5173 وضفنا السلاش في الآخر للاحتياط
-            cfg.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5173"));
+            // تحديد الـ Origins بدقة
+            cfg.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173", 
+                "http://127.0.0.1:5173", 
+                "http://localhost:3000"
+            ));
+            // السماح بكل الـ Methods بما فيها الـ OPTIONS المهمة للمتصفح
             cfg.setAllowedMethods(Collections.singletonList("*"));
             cfg.setAllowCredentials(true);
             cfg.setAllowedHeaders(Collections.singletonList("*"));
-            cfg.setExposedHeaders(Collections.singletonList("Authorization"));
+            cfg.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
             cfg.setMaxAge(3600L);
             return cfg;
         };
