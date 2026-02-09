@@ -13,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import java.util.Arrays;
+
 
 import java.util.Collections;
 
@@ -64,7 +66,8 @@ public class securityconfig {
     private CorsConfigurationSource corsConfigurationSource() {
         return request -> {
             CorsConfiguration cfg = new CorsConfiguration();
-            cfg.setAllowedOrigins(Collections.singletonList("http://localhost:3000")); // رابط الـ React بتاعك
+            // التعديل هنا: غيرنا 3000 لـ 5173 وضفنا السلاش في الآخر للاحتياط
+            cfg.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5173"));
             cfg.setAllowedMethods(Collections.singletonList("*"));
             cfg.setAllowCredentials(true);
             cfg.setAllowedHeaders(Collections.singletonList("*"));
